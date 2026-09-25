@@ -1,0 +1,39 @@
+= Jujutsu integration
+
+The `:jj` command is a wrapper around the https://jj-vcs.github.io/jj/latest/[jj] CLI.
+
+Some commands such as `:jj show` will output to a scratch buffer, while
+others such as `:jj new` output to both the info box and the `\*debug*` buffer.
+
+If the `kak-ansi` plugin is available, an implicit `--color=always` argument
+is passed when outputting to scratch buffers, and `ansi-enable` is called
+in those buffers.
+
+== jj diff, jj show
+
+These create a scratch buffer with the `jj-diff` filetype,
+or, if the `--git` options was given, the `git-diff` filetype.
+
+Tip: use the `--git` option in order to use features that assume unified diff
+format such as `:diff-jump` (bound to `<ret>`), `:git blame` or `:jj split`.
+As a hack to make these tools work `:jj show` replaces the `Commit ID:`
+header with `commit`.
+
+== jj split
+
+This command splits a revision in two.
+
+Unlike the first-party TUI version, `:jj split` does not launch an interactive
+program to select the changes for the first split.
+
+Instead, it uses Kakoune's selections, which are assumed to be within a
+unified diff (as created by `:jj show --git` for example). See also the
+`:patch` and `:git apply` commands.
+
+Calling `:jj split` repeatedly on different parts of the same diff, works
+best if the "Change ID" header is present (such as after `:jj show --git`).
+
+Instead of prompting for change descriptions for both splits, `:jj split`
+leaves the first one empty and the second one unchanged. This is partly due
+to incomplete implementation and also because this integration is slightly
+biased towards making multiple small splits that are eventually squashed.

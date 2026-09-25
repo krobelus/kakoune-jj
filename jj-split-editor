@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+original_description_was_empty=$1
+state_file=$2
+desc_file=$3
+# If the original description was empty, we'll be called only once.
+if ! $original_description_was_empty && [ -z "$(cat "$state_file")" ]; then
+    echo second >"$state_file"
+    >"$desc_file"
+else
+    rm "$state_file"
+fi
