@@ -26,6 +26,8 @@ declare-option -hidden -docstring %{
     whether to suppress output of successful jj commands
 } bool jj_silent false
 
+declare-option -hidden str jj_source %val{source}
+
 define-command jj -params 0.. -docstring %{
     jj [<arguments>]: wrapper for the Jujutsu version control system CLI
     All optional arguments are forwarded to the jj utility.
@@ -33,6 +35,10 @@ define-command jj -params 0.. -docstring %{
 } %{ evaluate-commands %sh{
     kakquote() {
         printf "%s" "$1" | sed "s/'/''/g; 1s/^/'/; \$s/\$/'/"
+    }
+
+    escape2() {
+        printf %s "$*" | sed "s/'/''''/g"
     }
 
     shell() {
@@ -161,7 +167,6 @@ define-command jj -params 0.. -docstring %{
         fi
         {
             trap 'rm -r "${fifo_dir}"' EXIT
-            escape2() { printf %s "$*" | sed "s/'/''''/g"; }
             export JJ_EDITOR="$(git rev-parse --sq-quote \
                 "${KAKOUNE_POSIX_SHELL:-/bin/sh}" \
                 "${kak_runtime}/rc/tools/blocking-editor-in-client" \
@@ -304,8 +309,9 @@ define-command jj -params 0.. -docstring %{
         if [ -z "$(jj log --no-graph --ignore-working-copy -r ${revision} -T description)" ]; then
             empty_description=true
         fi
-        echo "patch %exp{JJ_EDITOR='$(shell) %val{runtime}/rc/tools/jj-split-editor $empty_description ${statefile}'} \
-                jj --color=auto %arg{@} -r $revision %exp{--tool=%val{runtime}/rc/tools/jj-split-tool}"
+        dir=${kak_opt_jj_source%/*}
+        echo "patch %{JJ_EDITOR='$(shell) $(escape2 "$dir")/jj-split-editor $empty_description ${statefile}'} \
+                jj --color=auto %arg{@} -r $revision '--tool=$(escape2 "$dir")/jj-split-tool'"
         # The first split will inherit the change ID from this diff, if
         # any. But typically -- when the diff is from "jj show --git" --
         # the remaining diff corresponds to the second split.  Update the
