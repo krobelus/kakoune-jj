@@ -55,3 +55,8 @@ define-command my-jj-select-revisions %{
 	Finally, set the 'r' register to the set of all selected commits.
 }
 ```
+
+## Contributing
+
+Send feedback and patches to [~krobelus/kakoune@lists.sr.ht](mailto:~krobelus/kakoune@lists.sr.ht) (see
+[public archives](https://lists.sr.ht/~krobelus/kakoune)) or use GitHub.
